@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: board-back-deployment
+  namespace: lhb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: board-back
+  template:
+    metadata:
+      labels:
+        app: board-back
+    spec:
+      containers:
+        - name: board-back
+          image: sole07/board-back:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mariadb://mariadb-service:3306/boarddb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: board-back-service
+  namespace: lhb
+spec:
+  selector:
+    app: board-back
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: NodePort
