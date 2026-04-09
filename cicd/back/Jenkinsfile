@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') { steps { checkout scm } }
+        stage('Build Java') {
+            steps { sh './gradlew clean build -x test' }
+        }
+        stage('Docker Build & Push') {
+            steps {
+                sh 'docker build -t sole07/board-back:latest -f cicd/back/Dockerfile .'
+                sh 'docker push sole07/board-back:latest'
+            }
+        }
+        stage('K8s Deploy') {
+            steps { sh 'kubectl apply -f cicd/back/backend.yml' }
+        }
+    }
+}

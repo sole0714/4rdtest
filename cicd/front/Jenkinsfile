@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') { steps { checkout scm } }
+        stage('Build Vue') {
+            steps {
+                dir('vue-project') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+        stage('Docker Build & Push') {
+            steps {
+                sh 'docker build -t sole07/board-front:latest -f cicd/front/Dockerfile .'
+                sh 'docker push sole07/board-front:latest'
+            }
+        }
+        stage('K8s Deploy') {
+            steps { sh 'kubectl apply -f cicd/front/frontend.yml' }
+        }
+    }
+}
